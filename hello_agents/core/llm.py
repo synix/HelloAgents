@@ -2,7 +2,7 @@
 
 import os
 from typing import Literal, Optional, Iterator
-from openai import OpenAI
+from openai import AzureOpenAI, OpenAI
 
 from .exceptions import HelloAgentsException
 
@@ -14,6 +14,7 @@ SUPPORTED_PROVIDERS = Literal[
     "modelscope",
     "kimi",
     "zhipu",
+    "azure",
     "ollama",
     "vllm",
     "local",
@@ -148,6 +149,8 @@ class HelloAgentsLLM:
                 return "kimi"
             elif "open.bigmodel.cn" in base_url_lower:
                 return "zhipu"
+            elif "openai.azure.com" in base_url_lower:
+                return "azure"
             elif "localhost" in base_url_lower or "127.0.0.1" in base_url_lower:
                 # 本地部署检测 - 优先检查特定服务
                 if ":11434" in base_url_lower or "ollama" in base_url_lower:
@@ -202,6 +205,11 @@ class HelloAgentsLLM:
             resolved_api_key = api_key or os.getenv("ZHIPU_API_KEY") or os.getenv("GLM_API_KEY") or os.getenv("LLM_API_KEY")
             resolved_base_url = base_url or os.getenv("LLM_BASE_URL") or "https://open.bigmodel.cn/api/paas/v4"
             return resolved_api_key, resolved_base_url
+        
+        elif self.provider == "azure":
+            resolved_api_key = api_key or os.getenv("AZURE_API_KEY") or os.getenv("LLM_API_KEY")
+            resolved_base_url = base_url or os.getenv("AZURE_ENDPOINT") or os.getenv("LLM_BASE_URL")
+            return resolved_api_key, resolved_base_url
 
         elif self.provider == "ollama":
             resolved_api_key = api_key or os.getenv("OLLAMA_API_KEY") or os.getenv("LLM_API_KEY") or "ollama"
@@ -231,6 +239,13 @@ class HelloAgentsLLM:
 
     def _create_client(self) -> OpenAI:
         """创建OpenAI客户端"""
+        if self.provider == "azure":
+            return AzureOpenAI(
+                api_key=self.api_key,
+                azure_endpoint=self.base_url,
+                api_version=os.getenv("AZURE_API_VERSION") or "2025-01-01-preview"
+            )
+
         return OpenAI(
             api_key=self.api_key,
             base_url=self.base_url,
@@ -300,7 +315,7 @@ class HelloAgentsLLM:
                 model=self.model,
                 messages=messages,
                 temperature=temperature if temperature is not None else self.temperature,
-                max_tokens=self.max_tokens,
+                max_completion_tokens=self.max_tokens,
                 stream=True,
             )
 
@@ -327,7 +342,7 @@ class HelloAgentsLLM:
                 model=self.model,
                 messages=messages,
                 temperature=kwargs.get('temperature', self.temperature),
-                max_tokens=kwargs.get('max_tokens', self.max_tokens),
+                max_completion_tokens=kwargs.get('max_tokens', self.max_tokens),
                 **{k: v for k, v in kwargs.items() if k not in ['temperature', 'max_tokens']}
             )
             return response.choices[0].message.content
