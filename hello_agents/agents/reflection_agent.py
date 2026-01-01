@@ -7,6 +7,7 @@ from ..core.config import Config
 from ..core.message import Message
 
 # 默认提示词模板
+# 分为initial/reflect/refine
 DEFAULT_PROMPTS = {
     "initial": """
 请根据以下要求完成任务：
@@ -15,6 +16,7 @@ DEFAULT_PROMPTS = {
 
 请提供一个完整、准确的回答。
 """,
+
     "reflect": """
 请仔细审查以下回答，并找出可能的问题或改进空间：
 
@@ -26,6 +28,7 @@ DEFAULT_PROMPTS = {
 
 请分析这个回答的质量，指出不足之处，并提出具体的改进建议。
 如果回答已经很好，请回答"无需改进"。
+
 """,
     "refine": """
 请根据反馈意见改进你的回答：

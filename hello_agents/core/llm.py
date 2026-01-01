@@ -309,7 +309,7 @@ class HelloAgentsLLM:
         Yields:
             str: 流式响应的文本片段
         """
-        print(f"🧠 正在调用 {self.model} 模型...")
+        print(f"🧠 正在流式调用 {self.model} 模型...")
         try:
             response = self._client.chat.completions.create(
                 model=self.model,
@@ -322,6 +322,8 @@ class HelloAgentsLLM:
             # 处理流式响应
             print("✅ 大语言模型响应成功:")
             for chunk in response:
+                if (not len(chunk.choices or [])):
+                    continue
                 content = chunk.choices[0].delta.content or ""
                 if content:
                     print(content, end="", flush=True)
@@ -337,6 +339,7 @@ class HelloAgentsLLM:
         非流式调用LLM，返回完整响应。
         适用于不需要流式输出的场景。
         """
+        print(f"🧠 正在非流式调用 {self.model} 模型...")
         try:
             response = self._client.chat.completions.create(
                 model=self.model,

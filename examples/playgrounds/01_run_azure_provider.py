@@ -3,7 +3,7 @@ from dotenv import load_dotenv
 from hello_agents.core.llm import HelloAgentsLLM
 from hello_agents.core.message import Message
 
-# 运行: uv run examples/run_azure_provider.py
+# 运行: uv run examples/playgrounds/01_run_azure_provider.py
 # 成功运行的前置条件
 # uv pip install ".[evaluation]"
 
