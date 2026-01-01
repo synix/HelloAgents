@@ -4,6 +4,8 @@ from __future__ import annotations
 
 import json
 from typing import Iterator, Optional, Union, TYPE_CHECKING, Any, Dict
+from openai import OpenAI
+from openai.types.chat import ChatCompletion
 
 from ..core.agent import Agent
 from ..core.config import Config
@@ -65,7 +67,7 @@ class FunctionCallAgent(Agent):
 
         schemas: list[dict[str, Any]] = []
 
-        # Tool对象
+        # 1. 遍历Tool对象, 即通过`register_tool`注册的tools
         for tool in self.tool_registry.get_all_tools():
             properties: Dict[str, Any] = {}
             required: list[str] = []
@@ -76,6 +78,7 @@ class FunctionCallAgent(Agent):
                 parameters = []
 
             for param in parameters:
+                # param 可能为 name/type/description/required/default
                 properties[param.name] = {
                     "type": _map_parameter_type(param.type),
                     "description": param.description or ""
@@ -85,6 +88,7 @@ class FunctionCallAgent(Agent):
                 if getattr(param, "required", True):
                     required.append(param.name)
 
+            # See # See https://platform.openai.com/docs/api-reference/chat/create#chat_create-tools
             schema: dict[str, Any] = {
                 "type": "function",
                 "function": {
@@ -100,7 +104,7 @@ class FunctionCallAgent(Agent):
                 schema["function"]["parameters"]["required"] = required
             schemas.append(schema)
 
-        # register_function 注册的工具（直接访问内部结构）
+        # 2. 遍历 通过`register_function`注册的工具（直接访问内部结构）
         function_map = getattr(self.tool_registry, "_functions", {})
         for name, info in function_map.items():
             schemas.append(
@@ -225,7 +229,7 @@ class FunctionCallAgent(Agent):
 
     def _invoke_with_tools(self, messages: list[dict[str, Any]], tools: list[dict[str, Any]], tool_choice: Union[str, dict], **kwargs):
         """调用底层OpenAI客户端执行函数调用"""
-        client = getattr(self.llm, "_client", None)
+        client: Optional[OpenAI] = getattr(self.llm, "_client", None)
         if client is None:
             raise RuntimeError("HelloAgentsLLM 未正确初始化客户端，无法执行函数调用。")
 
@@ -276,7 +280,7 @@ class FunctionCallAgent(Agent):
         final_response = ""
 
         while current_iteration < iterations_limit:
-            response = self._invoke_with_tools(
+            response: ChatCompletion = self._invoke_with_tools(
                 messages,
                 tools=tool_schemas,
                 tool_choice=effective_tool_choice,
@@ -287,6 +291,9 @@ class FunctionCallAgent(Agent):
             assistant_message = choice.message
             content = self._extract_message_content(assistant_message.content)
             tool_calls = list(assistant_message.tool_calls or [])
+
+            print(f"🔨tool_calls in {current_iteration}:")
+            print(tool_calls)
 
             if tool_calls:
                 assistant_payload: dict[str, Any] = {"role": "assistant", "content": content}

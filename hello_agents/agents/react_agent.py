@@ -148,7 +148,9 @@ class ReActAgent(Agent):
             # 调用LLM
             messages = [{"role": "user", "content": prompt}]
             response_text = self.llm.invoke(messages, **kwargs)
-            
+
+            print(f"🐂 LLM的原始响应:", response_text)
+
             if not response_text:
                 print("❌ 错误：LLM未能返回有效响应。")
                 break
@@ -162,6 +164,8 @@ class ReActAgent(Agent):
             if not action:
                 print("⚠️ 警告：未能解析出有效的Action，流程终止。")
                 break
+
+            print(f"🐴 action:", action)
             
             # 检查是否完成
             if action.startswith("Finish"):
@@ -201,8 +205,9 @@ class ReActAgent(Agent):
     
     def _parse_output(self, text: str) -> Tuple[Optional[str], Optional[str]]:
         """解析LLM输出，提取思考和行动"""
-        thought_match = re.search(r"Thought: (.*)", text)
-        action_match = re.search(r"Action: (.*)", text)
+        thought_match = re.search(r"Thought:\s*(.*)", text)
+        # 允许Action内容跨多行
+        action_match = re.search(r"Action:\s*(.*)", text, re.DOTALL)
         
         thought = thought_match.group(1).strip() if thought_match else None
         action = action_match.group(1).strip() if action_match else None
@@ -211,12 +216,12 @@ class ReActAgent(Agent):
     
     def _parse_action(self, action_text: str) -> Tuple[Optional[str], Optional[str]]:
         """解析行动文本，提取工具名称和输入"""
-        match = re.match(r"(\w+)\[(.*)\]", action_text)
+        match = re.match(r"(\w+)\[(.*)\]", action_text, re.DOTALL)
         if match:
             return match.group(1), match.group(2)
         return None, None
     
     def _parse_action_input(self, action_text: str) -> str:
         """解析行动输入"""
-        match = re.match(r"\w+\[(.*)\]", action_text)
+        match = re.match(r"\w+\[(.*)\]", action_text, re.DOTALL)
         return match.group(1) if match else ""

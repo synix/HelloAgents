@@ -114,12 +114,18 @@ def demo_react_agent():
 可用工具如下：
 {tools}
 
-请按照以下格式进行研究：
+请严格按照以下格式进行回应，每次只能执行一个步骤：
 
 Thought: 分析问题，确定需要什么信息，制定研究策略。
 Action: 选择合适的工具获取信息，格式为：
 - `{{tool_name}}[{{tool_input}}]`：调用工具获取信息。
 - `Finish[研究结论]`：当你有足够信息得出结论时。
+
+## 重要提醒
+1. 每次回应必须包含Thought和Action两部分
+2. 工具调用的格式必须严格遵循：工具名[参数]
+3. 只有当你确信有足够信息回答问题时，才使用Finish
+4. 如果工具返回的信息不够，继续使用其他工具或相同工具的不同参数
 
 研究问题：{question}
 已完成的研究：{history}
@@ -487,26 +493,26 @@ def main():
     print("5. 交互式Agent体验")
 
     try:
-        # 1. SimpleAgent演示
-        demo_simple_agent()
+        # # 1. SimpleAgent演示
+        # demo_simple_agent()
 
         # 2. ReActAgent演示（默认 + 自定义）
         demo_react_agent()
 
-        # 3. ReflectionAgent演示（默认 + 自定义）
-        demo_reflection_agent()
+        # # 3. ReflectionAgent演示（默认 + 自定义）
+        # demo_reflection_agent()
 
-        # 4. PlanAndSolveAgent演示（默认 + 自定义）
-        demo_plan_solve_agent()
+        # # 4. PlanAndSolveAgent演示（默认 + 自定义）
+        # demo_plan_solve_agent()
 
-        # 5. 自定义 vs 默认配置对比
-        demo_custom_vs_default()
+        # # 5. 自定义 vs 默认配置对比
+        # demo_custom_vs_default()
 
-        # 6. 高级功能演示
-        demo_advanced_features()
+        # # 6. 高级功能演示
+        # demo_advanced_features()
 
-        # 7. 交互式演示
-        interactive_demo()
+        # # 7. 交互式演示
+        # interactive_demo()
 
         print("\n" + "="*60)
         print("🎉 HelloAgents 框架演示完成！")

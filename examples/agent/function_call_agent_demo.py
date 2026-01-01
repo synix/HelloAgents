@@ -1,5 +1,6 @@
 """最简 FunctionCallAgent 示例"""
 
+from dotenv import load_dotenv
 from hello_agents.agents import FunctionCallAgent
 from hello_agents.core.llm import HelloAgentsLLM
 from hello_agents.tools.registry import ToolRegistry
@@ -16,13 +17,15 @@ def get_horoscope(sign: str) -> str:
 
 
 def main() -> None:
+    load_dotenv()
+
     # 需提前配置 OPENAI_API_KEY，或在 HelloAgentsLLM 中传入 api_key/base_url
     llm = HelloAgentsLLM(model="gpt-4o-mini")
 
     registry = ToolRegistry()
     registry.register_function(
         name="get_horoscope",
-        description="Get today's horoscope for an astrological sign.",
+        description="获取某个星座的今日运势。",
         func=get_horoscope,
     )
 
