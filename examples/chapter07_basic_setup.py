@@ -169,6 +169,7 @@ def demo_reflection_agent():
     try:
         response = default_agent.run(task1)
         print(f"\n✅ 默认配置结果:\n{response}")
+        print(f"\n📝 MEMORY:\n", default_agent.memory.get_trajectory())
     except Exception as e:
         print(f"❌ 错误: {e}")
 
@@ -214,6 +215,7 @@ def demo_reflection_agent():
     try:
         response = code_agent.run(task2)
         print(f"\n✅ 代码专家结果:\n{response}")
+        print(f"\n📝 MEMORY:\n", code_agent.memory.get_trajectory())
     except Exception as e:
         print(f"❌ 错误: {e}")
 
@@ -303,6 +305,7 @@ def demo_custom_vs_default():
     try:
         default_result = default_agent.run(task)
         print(f"\n✅ 默认配置结果:\n{default_result}")
+        print(f"\n📝 MEMORY:\n", default_agent.memory.get_trajectory())
     except Exception as e:
         print(f"❌ 错误: {e}")
 
@@ -356,6 +359,7 @@ def demo_custom_vs_default():
     try:
         custom_result = product_agent.run(task)
         print(f"\n✅ 产品经理专家结果:\n{custom_result}")
+        print(f"\n📝 MEMORY:\n", product_agent.memory.get_trajectory())
     except Exception as e:
         print(f"❌ 错误: {e}")
 
@@ -493,13 +497,13 @@ def main():
     print("5. 交互式Agent体验")
 
     try:
-        # # 1. SimpleAgent演示
+        # 1. SimpleAgent演示
         # demo_simple_agent()
 
         # 2. ReActAgent演示（默认 + 自定义）
-        demo_react_agent()
+        # demo_react_agent()
 
-        # # 3. ReflectionAgent演示（默认 + 自定义）
+        # 3. ReflectionAgent演示（默认 + 自定义）
         # demo_reflection_agent()
 
         # # 4. PlanAndSolveAgent演示（默认 + 自定义）
@@ -509,7 +513,7 @@ def main():
         # demo_custom_vs_default()
 
         # # 6. 高级功能演示
-        # demo_advanced_features()
+        demo_advanced_features()
 
         # # 7. 交互式演示
         # interactive_demo()

@@ -10,6 +10,7 @@ class ToolChain:
     def __init__(self, name: str, description: str):
         self.name = name
         self.description = description
+        # 列表中的项包括`tool_name`, `input_template`, `output_key` 这3个字段
         self.steps: List[Dict[str, Any]] = []
 
     def add_step(self, tool_name: str, input_template: str, output_key: str = None):
@@ -47,6 +48,7 @@ class ToolChain:
         print(f"🚀 开始执行工具链: {self.name}")
         
         # 初始化上下文
+        # 步骤之间通过context传递数据, 即上一步通过`output_key`输出的数据, 可能会作为下一步`input_template`里的变量名
         if context is None:
             context = {}
         context["input"] = input_data

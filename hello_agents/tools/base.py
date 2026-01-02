@@ -115,6 +115,7 @@ class Tool(ABC):
             "parameters": [param.dict() for param in self.get_parameters()]
         }
 
+    # See https://platform.openai.com/docs/api-reference/chat/create#chat_create-tools
     def to_openai_schema(self) -> Dict[str, Any]:
         """转换为 OpenAI function calling schema 格式
 
