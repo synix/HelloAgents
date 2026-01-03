@@ -42,7 +42,7 @@ class QdrantConnectionManager:
         timeout: int = 30,
         **kwargs
     ) -> 'QdrantVectorStore':
-        """获取或创建Qdrant实例（单例模式）"""
+        """获取或创建Qdrant实例(单例模式) """
         # 创建唯一键
         key = (url or "local", collection_name)
         
@@ -103,10 +103,12 @@ class QdrantVectorStore:
         self.timeout = timeout
         # HNSW/Query params via env
         try:
+            # hnsw_m: 每个节点在图中保留的最大近邻数, 越大图越稠密, 索引占用更多内存/磁盘, 建索引更慢, 但召回率更高.
             self.hnsw_m = int(os.getenv("QDRANT_HNSW_M", "32"))
         except Exception:
             self.hnsw_m = 32
         try:
+            # hnsw_ef_construct: 建索引时的搜索宽度(构建时候选集大小). 值越大, 构建更耗时/内存, 但索引质量更好、召回率更高; 值小则建索引快但精度下降.
             self.hnsw_ef_construct = int(os.getenv("QDRANT_HNSW_EF_CONSTRUCT", "256"))
         except Exception:
             self.hnsw_ef_construct = 256
@@ -374,6 +376,8 @@ class QdrantVectorStore:
             # 搜索参数
             search_params = None
             try:
+                # hnsw_ef: hnsw_ef是HNSW查询时的候选集宽度. 搜索过程中会保留最多hnsw_ef个候选节点继续扩展, 值越大召回率越高、延迟和内存占用越高.
+                # exact: 是否进行近邻检索. exact为False时进行近邻检索
                 search_params = models.SearchParams(hnsw_ef=self.search_ef, exact=self.search_exact)
             except Exception:
                 search_params = None
@@ -455,10 +459,10 @@ class QdrantVectorStore:
     
     def delete_memories(self, memory_ids: List[str]):
         """
-        删除指定记忆（通过payload中的 memory_id 过滤删除）
+        删除指定记忆(通过payload中的 memory_id 过滤删除)
         
-        注意：由于写入时可能将非UUID的点ID转换为UUID，这里不再依赖点ID，
-        而是通过payload中的memory_id来匹配删除，确保一致性。
+        注意: 由于写入时可能将非UUID的点ID转换为UUID, 这里不再依赖点ID.
+        而是通过payload中的memory_id来匹配删除, 确保一致性。
         """
         try:
             if not memory_ids:
