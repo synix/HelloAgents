@@ -3,7 +3,8 @@
 import asyncio
 import concurrent.futures
 from typing import Dict, Any, List
-from .registry import ToolRegistry
+from hello_agents.tools.builtin.calculator import calculate
+from hello_agents.tools.registry import ToolRegistry
 
 
 class AsyncToolExecutor:
@@ -99,6 +100,15 @@ class AsyncToolExecutor:
         self.executor.shutdown(wait=True)
         print("🔒 异步工具执行器已关闭")
 
+    async def __aenter__(self):
+        # Support async context manager usage
+        return self
+
+    async def __aexit__(self, exc_type, exc_val, exc_tb):
+        # Shut down the thread pool without blocking the event loop
+        loop = asyncio.get_running_loop()
+        await loop.run_in_executor(None, self.close)
+
     def __enter__(self):
         return self
 
@@ -154,10 +164,12 @@ def run_batch_tool_sync(registry: ToolRegistry, tool_name: str, input_list: List
 # 示例函数
 async def demo_parallel_execution():
     """演示并行执行的示例"""
-    from .registry import ToolRegistry
-    
-    # 创建注册表（这里假设已经注册了工具）
     registry = ToolRegistry()
+    registry.register_function(
+        name="my_calculator",
+        description="简单的数学计算工具, 支持基本运算(+,-,*,/)和sqrt函数",
+        func=calculate
+    )
     
     # 定义并行任务
     tasks = [
