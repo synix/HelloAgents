@@ -57,6 +57,34 @@ class RAGTool(Tool):
         self.qdrant_api_key = qdrant_api_key or os.getenv("QDRANT_API_KEY")
         self.collection_name = collection_name
         self.rag_namespace = rag_namespace
+
+        #  这是一个字典的字典：
+        #   - 外层键：namespace
+        #   - 外层值：pipeline对象
+
+        #   例如：
+        #   {
+        #       "default": {
+        #           "store": QdrantVectorStore对象,
+        #           "namespace": "default",
+        #           "add_documents": 函数,
+        #           "search": 函数,
+        #           "search_advanced": 函数,
+        #           "get_stats": 函数
+        #       },
+        #       "project_a": {
+        #           "store": QdrantVectorStore对象,
+        #           "namespace": "project_a",
+        #           "add_documents": 函数,
+        #           ...
+        #       },
+        #       "project_b": {
+        #           ...
+        #       }
+        #   }
+
+        # pipeline对象 是通过 hello_agents/memory/rag/pipeline.py 里的 create_rag_pipeline() 函数创建的
+
         self._pipelines: Dict[str, Dict[str, Any]] = {}
         
         # 确保知识库目录存在
@@ -75,6 +103,7 @@ class RAGTool(Tool):
                 collection_name=self.collection_name,
                 rag_namespace=self.rag_namespace
             )
+
             self._pipelines[self.rag_namespace] = default_pipeline
 
             # 初始化 LLM 用于回答生成
@@ -82,7 +111,7 @@ class RAGTool(Tool):
 
             self.initialized = True
             print(f"✅ RAG工具初始化成功: namespace={self.rag_namespace}, collection={self.collection_name}")
-            
+
         except Exception as e:
             self.initialized = False
             self.init_error = str(e)
